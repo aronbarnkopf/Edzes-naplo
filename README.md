@@ -1,1 +1,0 @@
-# Edzes-naplo
