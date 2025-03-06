@@ -2,28 +2,29 @@ package com.workouttracker.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.workouttracker.ui.screen.*
+import com.workouttracker.viewmodel.WorkoutViewModel
 
 
 @Composable
-fun WorkoutAppNavHost(navController: NavHostController = rememberNavController()) {
+fun WorkoutAppNavHost(navController: NavHostController, viewModel: WorkoutViewModel) {
     NavHost(navController = navController, startDestination = "main") {
         composable("main") {
             MainScreen(onNavigate = { route -> navController.navigate(route) })
         }
         composable("workout_log") {
-            WorkoutLogScreen(onNavigate = { route -> navController.navigate(route) })
+            WorkoutLogScreen(viewModel = viewModel, onNavigate = { route -> navController.navigate(route) })
         }
         composable("new_workout") {
-            NewWorkoutScreen(onSave = {})
+            NewWorkoutScreen(viewModel = viewModel, onNavigate = { navController.popBackStack() })
         }
         composable("timer_setup") {
             TimerSetupScreen(onStart = {})
+        }
+        composable("workout_detail") {
+            WorkoutDetailScreen(viewModel = viewModel, onNavigateBack = { navController.popBackStack() })
         }
     }
 }
