@@ -12,18 +12,19 @@ import com.workouttracker.db.model.*
     TimerPreset::class, TimerInterval::class],
     version = 5, exportSchema = false)
 @TypeConverters(Converters::class)
-abstract class WorkoutDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutDao(): WorkoutDao
+    abstract fun timerDao(): TimerDao
 
     companion object {
         @Volatile
-        private var INSTANCE: WorkoutDatabase? = null
+        private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): WorkoutDatabase =
+        fun getDatabase(context: Context): AppDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
-                    WorkoutDatabase::class.java,
+                    AppDatabase::class.java,
                     "workout_database"
                 ).fallbackToDestructiveMigration()
                     .build().also { INSTANCE = it }

@@ -22,6 +22,7 @@ fun NewWorkoutScreen(viewModel: WorkoutViewModel, onNavigate: (String) -> Unit) 
     // Dialog állapot
     var isDialogOpen by remember { mutableStateOf(false) }
     var newExerciseName by remember { mutableStateOf("") }
+    var newExerciseType by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(16.dp)) {
         TextField(
@@ -99,16 +100,37 @@ fun NewWorkoutScreen(viewModel: WorkoutViewModel, onNavigate: (String) -> Unit) 
 
     // Dialog a gyakorlat hozzáadásához
     if (isDialogOpen) {
+        var expanded by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { isDialogOpen = false },
             title = { Text("Add New Exercise") },
             text = {
-                TextField(
-                    value = newExerciseName,
-                    onValueChange = { newExerciseName = it },
-                    label = { Text("Exercise Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column {
+                    TextField(
+                        value = newExerciseName,
+                        onValueChange = { newExerciseName = it },
+                        label = { Text("Exercise Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Box(Modifier.padding(16.dp)) {
+                        Button(
+                            onClick = { expanded = !expanded }
+                        ) {
+                            Text(newExerciseType.ifEmpty { "Type" }) // A kiválasztott típus jelenjen meg
+                        }
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        listOf("Back", "Chest", "Shoulder", "Arm", "Leg").forEach { type ->
+                            DropdownMenuItem(
+                                text = { Text(type) },
+                                onClick = {
+                                    newExerciseType = type
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
             },
             confirmButton = {
                 Button(
@@ -117,7 +139,7 @@ fun NewWorkoutScreen(viewModel: WorkoutViewModel, onNavigate: (String) -> Unit) 
                         val newExercise = Exercise(
                             name = newExerciseName,
                             id = 0, // Ez az id csak ideiglenes, mivel az adatbázisban generálódik
-                            type = ""
+                            type = newExerciseType
                         )
                         viewModel.addExercise(newExercise) { id ->
                             // Miután hozzáadtuk, bezárjuk a Dialog-ot
@@ -131,7 +153,7 @@ fun NewWorkoutScreen(viewModel: WorkoutViewModel, onNavigate: (String) -> Unit) 
                         }
                     }
                 ) {
-                    Text("OK")
+                    Text("Save")
                 }
             },
             dismissButton = {

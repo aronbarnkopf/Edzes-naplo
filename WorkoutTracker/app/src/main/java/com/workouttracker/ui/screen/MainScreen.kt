@@ -18,7 +18,7 @@ fun MainScreen(onNavigate: (String) -> Unit) {
                 Text("📓 Edzésnapló")
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = { onNavigate("timer_setup") }) {
+            Button(onClick = { onNavigate("timer") }) {
                 Text("⏱ Időzítő")
             }
         }

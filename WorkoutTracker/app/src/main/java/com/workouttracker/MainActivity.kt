@@ -8,24 +8,26 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
-import com.workouttracker.db.WorkoutDatabase
+import com.workouttracker.db.AppDatabase
+import com.workouttracker.db.TimerRepository
 import com.workouttracker.db.WorkoutRepository
 import com.workouttracker.db.model.*
-import com.workouttracker.ui.WorkoutAppNavHost
+import com.workouttracker.ui.AppNavHost
 import com.workouttracker.ui.theme.WorkoutTrackerTheme
 import com.workouttracker.viewmodel.*
 import kotlinx.coroutines.launch
 import java.util.Date
 
 class MainActivity : ComponentActivity() {
-    private lateinit var viewModel: WorkoutViewModel
+    private lateinit var workoutViewModel: WorkoutViewModel
+    private lateinit var timerViewModel: TimerViewModel
 
     // Method to clear all data in the database
     private fun clearDatabase() {
         lifecycleScope.launch {
             try {
                 // Delete all workouts
-                viewModel.deleteAll()
+                workoutViewModel.deleteAll()
 
                 // Log the success (optional)
                 println("Database cleared!")
@@ -39,7 +41,7 @@ class MainActivity : ComponentActivity() {
     private fun populateDatabaseIfEmpty() {
         lifecycleScope.launch {
             try {
-                viewModel.getAllWorkout { existingWorkouts ->
+                workoutViewModel.getAllWorkout { existingWorkouts ->
                     if (existingWorkouts.isNotEmpty()) return@getAllWorkout // 🔹 If there are workouts, exit
 
                     // Create a new workout if the database is empty
@@ -47,10 +49,10 @@ class MainActivity : ComponentActivity() {
                     val squat = Exercise(name = "Squat", type = "Leg")
                     val deadlift = Exercise(name = "Deadlift", type = "Leg")
 
-                    viewModel.addExercise(squat) { exerciseId ->
+                    workoutViewModel.addExercise(squat) { exerciseId ->
                         val workoutExercise1 = WorkoutExercise(workoutId = 0, exerciseId = exerciseId.toInt())
 
-                        viewModel.addExercise(deadlift) { exerciseId2 ->
+                        workoutViewModel.addExercise(deadlift) { exerciseId2 ->
                             val workoutExercise2 = WorkoutExercise(workoutId = 0, exerciseId = exerciseId2.toInt())
 
                             // Create sets for the exercises
@@ -68,7 +70,7 @@ class MainActivity : ComponentActivity() {
                             )
 
                             // Save it to the database
-                            viewModel.addWorkoutWithExercises(workoutWithExercises) {}
+                            workoutViewModel.addWorkoutWithExercises(workoutWithExercises) {}
                         }
                     }
                 }
@@ -84,13 +86,17 @@ class MainActivity : ComponentActivity() {
 
         val database = Room.databaseBuilder(
             applicationContext,
-            WorkoutDatabase::class.java,
+            AppDatabase::class.java,
             "workout-db"
         ).fallbackToDestructiveMigration().build()
 
-        val repository = WorkoutRepository(database.workoutDao())
-        val factory = WorkoutViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory)[WorkoutViewModel::class.java]
+        val workoutRepository = WorkoutRepository(database.workoutDao())
+        val workoutFactory = WorkoutViewModelFactory(workoutRepository)
+        workoutViewModel = ViewModelProvider(this, workoutFactory)[WorkoutViewModel::class.java]
+
+        val timerRepository = TimerRepository(database.timerDao())
+        val timerFactory = TimerViewModelFactory(timerRepository)
+        timerViewModel = ViewModelProvider(this, timerFactory)[TimerViewModel::class.java]
 
         // Clear the database every time the app starts (for development)
         //clearDatabase()
@@ -101,7 +107,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WorkoutTrackerTheme {
                 val navController = rememberNavController()
-                WorkoutAppNavHost(navController = navController, viewModel = viewModel)
+                AppNavHost(navController = navController, workoutViewModel = workoutViewModel, timerViewModel = timerViewModel)
             }
         }
     }
