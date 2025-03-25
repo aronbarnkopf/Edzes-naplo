@@ -17,3 +17,10 @@ val SkyBlue80 = Color(0xFFA8D8F0) // Soft sky blue, similar to Pink80
 val Blue40 = Color(0xFF5065A4) // Deep blue, similar to Purple40
 val BlueGrey40 = Color(0xFF4F5B71) // Muted dark blue-grey, similar to PurpleGrey40
 val SkyBlue40 = Color(0xFF527D90) // Darker sky blue, similar to Pink40
+
+val NeonBlue = Color(0xff19c1d0)
+val DarkNeonBlue = Color(0xff459aae)
+val LightGrayBlue = Color(0xffb0cfd2)
+val GrayBlue = Color(0xff90c6cb)
+val DarkGrayBlue = Color(0xff70aeb4)
+

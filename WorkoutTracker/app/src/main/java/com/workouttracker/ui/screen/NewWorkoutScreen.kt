@@ -7,125 +7,159 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.workouttracker.db.model.*
+import com.workouttracker.ui.theme.DarkGrayBlue
+import com.workouttracker.ui.theme.LightGrayBlue
 import com.workouttracker.viewmodel.WorkoutViewModel
 import java.util.Date
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewWorkoutScreen(viewModel: WorkoutViewModel, onNavigate: (String) -> Unit) {
     var workoutName by remember { mutableStateOf("") }
-    var selectedExercises by remember { mutableStateOf(listOf<Exercise?>()) }
     val availableExercises by viewModel.availableExercises.collectAsState(initial = listOf())
+    var selectedExercises by remember { mutableStateOf(listOf<Exercise>()) }
 
     // Dialog állapot
     var isDialogOpen by remember { mutableStateOf(false) }
     var newExerciseName by remember { mutableStateOf("") }
     var newExerciseType by remember { mutableStateOf("") }
+    var selectedExercise by remember { mutableStateOf<Exercise?>(null) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        TextField(
-            value = workoutName,
-            onValueChange = { workoutName = it },
-            label = { Text("Workout Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text("New Workout") })
+        },
+        floatingActionButton = {
+            Button(
+                onClick = {
+                    val workoutWithExercises = WorkoutWithExercises(
+                        workout = Workout(name = workoutName, isSaved = true, date = Date()),
+                        workoutExercises = selectedExercises.map { exercise ->
+                            ExerciseWithSetts(
+                                workoutExercise = WorkoutExercise(workoutId = 0, exerciseId = exercise.id),
+                                exercise = exercise,
+                                setts = emptyList()
+                            )
+                        }
+                    )
+                    viewModel.addWorkoutWithExercises(workoutWithExercises) {}
+                    onNavigate("workout_log")
+                },
+                enabled = workoutName.isNotBlank() && selectedExercises.isNotEmpty(),
+                colors = ButtonColors(
+                    containerColor = Color.LightGray,
+                    contentColor = Color.Black,
+                    disabledContainerColor = Color.LightGray,
+                    disabledContentColor = Color.Gray
+                )
+            ) {
+                Text("Save", style = MaterialTheme.typography.headlineSmall)
+            }
+        }
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding), horizontalAlignment = Alignment.CenterHorizontally) {
+            TextField(
+                value = workoutName,
+                onValueChange = { workoutName = it },
+                label = { Text("Workout Name") },
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Exercises")
+            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+                items(selectedExercises) { exercise ->
+                    Button(
+                        onClick = { isDialogOpen = true; selectedExercise = exercise },
+                        colors = ButtonDefaults.buttonColors(containerColor = DarkGrayBlue, contentColor = Color.Black),
+                    ) {
+                        Text(text = exercise.name)
+                    }
+                }
+            }
 
-        LazyColumn {
-            items(selectedExercises) { selectedExercise ->
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    var expanded by remember { mutableStateOf(false) }
+            Button(
+                onClick = { isDialogOpen = true; selectedExercise = null },
+                modifier = Modifier.padding(top = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = DarkGrayBlue, contentColor = Color.Black),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Exercise")
+            }
+        }
+    }
 
+    // **Dialog a gyakorlat hozzáadásához**
+    if (isDialogOpen) {
+        var expandedExercise by remember { mutableStateOf(false) }
+        var expandedType by remember { mutableStateOf(false) }
+
+        AlertDialog(
+            containerColor = LightGrayBlue,
+            onDismissRequest = { isDialogOpen = false },
+            title = { Text("Select or Add Exercise") },
+            text = {
+                Column {
+                    // **Meglévő gyakorlat kiválasztása**
                     Box {
-                        Button(onClick = { expanded = true }) {
+                        Button(
+                            onClick = { expandedExercise = true },
+                            colors = ButtonColors(
+                                containerColor = DarkGrayBlue,
+                                contentColor = Color.Black,
+                                disabledContainerColor = Color.LightGray,
+                                disabledContentColor = Color.Gray
+                            )
+                        ) {
                             Text(text = selectedExercise?.name ?: "Select Exercise")
                         }
-                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        DropdownMenu(expanded = expandedExercise, onDismissRequest = { expandedExercise = false }) {
                             availableExercises.forEach { exercise ->
                                 DropdownMenuItem(
                                     text = { Text(exercise.name) },
                                     onClick = {
-                                        selectedExercises = selectedExercises.map { e ->
-                                            if (e == selectedExercise) exercise else e
-                                        }
-                                        expanded = false
+                                        selectedExercises = selectedExercises + exercise
+                                        expandedExercise = false
+                                        isDialogOpen = false
                                     }
                                 )
                             }
                         }
                     }
 
-                    // Az Add gomb, ami megnyitja a Dialog-ot
-                    IconButton(onClick = { isDialogOpen = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "New Exercise")
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
+                    Text("Or create a new one:")
 
-        Button(onClick = { selectedExercises = selectedExercises + null }, modifier = Modifier.padding(top = 8.dp)) {
-            Text("Add Exercise")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                val savedWorkoutWithExercises = WorkoutWithExercises(
-                    workout = Workout(name = workoutName, isSaved = true, date = Date()),
-                    workoutExercises = selectedExercises.mapNotNull { it }.map { exercise ->
-                        ExerciseWithSetts(
-                            workoutExercise = WorkoutExercise(
-                                workoutId = 0,
-                                exerciseId = exercise.id
-                            ),
-                            exercise = exercise,
-                            setts = emptyList()
-                        )
-                    }
-                )
-                viewModel.addWorkoutWithExercises(savedWorkoutWithExercises, onSuccess = {})
-                onNavigate("workout_log")
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = workoutName.isNotBlank() && selectedExercises.any { it != null }
-        ) {
-            Text("Save Workout")
-        }
-    }
-
-    // Dialog a gyakorlat hozzáadásához
-    if (isDialogOpen) {
-        var expanded by remember { mutableStateOf(false) }
-        AlertDialog(
-            onDismissRequest = { isDialogOpen = false },
-            title = { Text("Add New Exercise") },
-            text = {
-                Column {
+                    // **Új gyakorlat neve**
                     TextField(
                         value = newExerciseName,
                         onValueChange = { newExerciseName = it },
                         label = { Text("Exercise Name") },
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    // **Új gyakorlat típusa kiválasztás**
                     Box(Modifier.padding(16.dp)) {
                         Button(
-                            onClick = { expanded = !expanded }
+                            onClick = { expandedType = !expandedType },
+                            colors = ButtonColors(
+                                containerColor = DarkGrayBlue,
+                                contentColor = Color.Black,
+                                disabledContainerColor = Color.LightGray,
+                                disabledContentColor = Color.Gray
+                            )
                         ) {
-                            Text(newExerciseType.ifEmpty { "Type" }) // A kiválasztott típus jelenjen meg
+                            Text(newExerciseType.ifEmpty { "Select Type" })
                         }
                     }
-                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    DropdownMenu(expanded = expandedType, onDismissRequest = { expandedType = false }) {
                         listOf("Back", "Chest", "Shoulder", "Arm", "Leg").forEach { type ->
                             DropdownMenuItem(
                                 text = { Text(type) },
                                 onClick = {
                                     newExerciseType = type
-                                    expanded = false
+                                    expandedType = false
                                 }
                             )
                         }
@@ -135,29 +169,40 @@ fun NewWorkoutScreen(viewModel: WorkoutViewModel, onNavigate: (String) -> Unit) 
             confirmButton = {
                 Button(
                     onClick = {
-                        // Az új gyakorlat hozzáadása az adatbázishoz
-                        val newExercise = Exercise(
-                            name = newExerciseName,
-                            id = 0, // Ez az id csak ideiglenes, mivel az adatbázisban generálódik
-                            type = newExerciseType
-                        )
-                        viewModel.addExercise(newExercise) { id ->
-                            // Miután hozzáadtuk, bezárjuk a Dialog-ot
-                            isDialogOpen = false
-                            newExerciseName = "" // Reseteljük a TextField-et
-
-                            // Az új gyakorlat hozzáadása a kiválasztott gyakorlatok közé
-                            selectedExercises = selectedExercises.map { e ->
-                                e ?: newExercise.copy(id = id.toInt())
+                        if (newExerciseName.isNotBlank()) {
+                            val newExercise = Exercise(
+                                name = newExerciseName,
+                                id = 0, // Az adatbázis generálja az ID-t
+                                type = newExerciseType
+                            )
+                            viewModel.addExercise(newExercise) { id ->
+                                selectedExercises = selectedExercises + newExercise.copy(id = id.toInt())
+                                isDialogOpen = false
+                                newExerciseName = "" // Resetelés
+                                newExerciseType = ""
                             }
                         }
-                    }
+                    },
+                    colors = ButtonColors(
+                        containerColor = DarkGrayBlue,
+                        contentColor = Color.Black,
+                        disabledContainerColor = Color.LightGray,
+                        disabledContentColor = Color.Gray
+                    )
                 ) {
                     Text("Save")
                 }
             },
             dismissButton = {
-                Button(onClick = { isDialogOpen = false }) {
+                Button(
+                    onClick = { isDialogOpen = false },
+                    colors = ButtonColors(
+                        containerColor = DarkGrayBlue,
+                        contentColor = Color.Black,
+                        disabledContainerColor = Color.LightGray,
+                        disabledContentColor = Color.Gray
+                    )
+                ) {
                     Text("Cancel")
                 }
             }
