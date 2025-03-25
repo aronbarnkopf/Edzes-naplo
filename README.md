@@ -3,6 +3,7 @@
 ## 📌 Cél
 
 Az alkalmazás célja egy könnyen használható, Android alapú edzésnapló és intervallum időzítő biztosítása, amely segít a felhasználóknak követni edzéseik fejlődését és hatékonyabbá tenni az edzésmunkát.
+![Képernyőkép 2025-03-19 084430](https://github.com/user-attachments/assets/b994cd53-0831-4106-a420-d2d8ef6d7ed9)
 
 ## 📱 Funkciók
 
