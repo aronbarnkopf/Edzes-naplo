@@ -56,9 +56,9 @@ class MainActivity : ComponentActivity() {
                             val workoutExercise2 = WorkoutExercise(workoutId = 0, exerciseId = exerciseId2.toInt())
 
                             // Create sets for the exercises
-                            val sett1 = Sett(workoutExerciseId = 0, weight = 90.0, reps = 5)
-                            val sett2 = Sett(workoutExerciseId = 0, weight = 100.0, reps = 5)
-                            val sett3 = Sett(workoutExerciseId = 0, weight = 120.0, reps = 3)
+                            val sett1 = Sett(workoutExerciseId = 0, weight = 90.0.toFloat(), reps = 5)
+                            val sett2 = Sett(workoutExerciseId = 0, weight = 100.0.toFloat(), reps = 5)
+                            val sett3 = Sett(workoutExerciseId = 0, weight = 120.0.toFloat(), reps = 3)
 
                             // Build the full WorkoutWithExercises object
                             val workoutWithExercises = WorkoutWithExercises(

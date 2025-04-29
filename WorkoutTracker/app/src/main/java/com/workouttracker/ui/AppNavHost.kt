@@ -40,5 +40,8 @@ fun AppNavHost(navController: NavHostController, workoutViewModel: WorkoutViewMo
             val context = LocalContext.current
             TimerScreen(context)
         }
+        composable("stats") {
+            StatScreen(viewModel = workoutViewModel)
+        }
     }
 }

@@ -49,7 +49,7 @@ fun MainScreen(onNavigate: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .clickable { /*onNavigate("stats")*/ }
+                    .clickable { onNavigate("stats") }
                     .weight(1f),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                 colors = CardDefaults.cardColors(

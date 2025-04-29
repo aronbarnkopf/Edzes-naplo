@@ -73,7 +73,17 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
         }
     }
 
-
+    fun getWorkoutWithExercise(exerciseId: Int, onResult: (List<WorkoutWithExercises>) -> Unit) {
+        viewModelScope.launch {
+            /*getAllWorkout { workouts ->
+                val filteredWorkouts = workouts.filter { workout ->
+                    workout.workoutExercises.any { it.exercise.id == exerciseId }
+                }
+                onResult(filteredWorkouts)
+            }*/
+            onResult(repository.getWorkoutWithExercise(exerciseId))
+        }
+    }
     // Összes Exercise lekérése
     fun getAllExercises(onResult: (List<Exercise>) -> Unit) {
         viewModelScope.launch {

@@ -40,7 +40,7 @@ data class Exercise(
 data class Sett(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val workoutExerciseId: Int, // Melyik WorkoutExercise-hez tartozik
-    val weight: Double, // Súly (kg)
+    val weight: Float, // Súly (kg)
     val reps: Int // Ismétlések száma
 )
 

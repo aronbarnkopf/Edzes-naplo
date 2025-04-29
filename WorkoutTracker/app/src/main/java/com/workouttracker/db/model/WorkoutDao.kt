@@ -61,4 +61,7 @@ interface WorkoutDao {
         deleteAllExercises()
         deleteAllWorkouts()
     }
+    @Transaction
+    @Query("SELECT * FROM Workout WHERE id IN (SELECT workoutId FROM WorkoutExercise WHERE exerciseId = :exerciseId)")
+    suspend fun getWorkoutWithExercise(exerciseId: Int): List<WorkoutWithExercises>
 }

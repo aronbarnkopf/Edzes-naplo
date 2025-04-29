@@ -62,5 +62,9 @@ class WorkoutRepository(private val workoutDao: WorkoutDao) {
     suspend fun deleteAll() {
         workoutDao.deleteAll()
     }
+
+    suspend fun getWorkoutWithExercise(exerciseId: Int): List<WorkoutWithExercises> {
+        return workoutDao.getWorkoutWithExercise(exerciseId)
+    }
 }
 

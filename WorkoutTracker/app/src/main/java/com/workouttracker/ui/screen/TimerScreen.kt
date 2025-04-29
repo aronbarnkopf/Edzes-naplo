@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("DefaultLocale")
 @Composable
 fun TimerScreen(context: Context) {
-    var timers by remember { mutableStateOf(listOf(5, 4, 3, 2)) }
+    var timers by remember { mutableStateOf(listOf(30)) }
     var currentTimers by remember { mutableStateOf(timers.toMutableList()) }
     var currentIndex by remember { mutableIntStateOf(0) }
     var isRunning by remember { mutableStateOf(false) }
@@ -148,14 +148,25 @@ fun TimerScreen(context: Context) {
                                 currentTimers[index] = newTime
                             },
                             style = if(index == currentIndex)TextStyle(fontSize = 48.sp, color = DarkNeonBlue) else TextStyle(fontSize = 36.sp),
-                            modifier = if(index == currentIndex) Modifier.padding(100.dp) else Modifier.padding(8.dp)
+                            modifier = if(index == currentIndex) Modifier.padding(100.dp) else Modifier.padding(8.dp),
+                            onDelete = {
+                                if(timers.size > 1){
+                                    val updatedTimers = timers.toMutableList()
+                                    updatedTimers.removeAt(index)
+                                    timers = updatedTimers
+                                    currentTimers = updatedTimers.toMutableList()
+                                    if (currentIndex >= index) {
+                                        currentIndex = (currentIndex - 1).coerceAtLeast(0)
+                                    }
+                                }
+                            }
                         )
                     }
                     item { Button(colors = ButtonColors(
                         containerColor = Color.Transparent, contentColor = Color.Black,
                         disabledContainerColor = Color.Gray,
                         disabledContentColor = Color.Black
-                    ), onClick = { timers += 30; currentTimers = timers.toMutableList() })
+                    ), onClick = { val updatedTimers = timers.toMutableList(); updatedTimers.add(30); timers = updatedTimers; currentTimers = timers.toMutableList() })
                     {
                         Icon(Icons.Filled.Add, contentDescription = "Add Timer", modifier = Modifier.size(36.dp))
                     } }
@@ -221,7 +232,7 @@ fun TimerScreen(context: Context) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TimePickerRow(time: Int, onTimeChange: (Int) -> Unit, style: TextStyle, modifier: Modifier) {
+fun TimePickerRow(time: Int, onTimeChange: (Int) -> Unit, style: TextStyle, modifier: Modifier, onDelete: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     var selectedMinutes by remember { mutableStateOf(0) }
     var selectedSeconds by remember { mutableStateOf(30) }
@@ -279,8 +290,13 @@ fun TimePickerRow(time: Int, onTimeChange: (Int) -> Unit, style: TextStyle, modi
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                Row {
+                    TextButton(onClick = { onDelete(); showDialog = false  }) {
+                        Text("Delete")
+                    }
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("Cancel")
+                    }
                 }
             }
         )

@@ -104,7 +104,7 @@ fun WorkoutDetailScreen(
                                             workoutExercises = workoutWithExercises.workoutExercises.map { exercise ->
                                                 if (exercise == exerciseWithSetts) {
                                                     exercise.copy(setts = exercise.setts.toMutableList().apply {
-                                                        set(index, sett.copy(weight = inputValue.text.toDoubleOrNull() ?: sett.weight))
+                                                        set(index, sett.copy(weight = inputValue.text.toFloatOrNull() ?: sett.weight))
                                                     })
                                                 } else exercise
                                             }
@@ -169,7 +169,7 @@ fun WorkoutDetailScreen(
                             viewModel.setTemporaryWorkout(workoutWithExercises.copy(
                                 workoutExercises = workoutWithExercises.workoutExercises.map {
                                     if (it == exerciseWithSetts) {
-                                        it.copy(setts = it.setts + Sett(workoutExerciseId = it.workoutExercise.id, weight = 0.0, reps = 0))
+                                        it.copy(setts = it.setts + Sett(workoutExerciseId = it.workoutExercise.id, weight = 0.0.toFloat(), reps = 0))
                                     } else it
                                 }
                             ))
