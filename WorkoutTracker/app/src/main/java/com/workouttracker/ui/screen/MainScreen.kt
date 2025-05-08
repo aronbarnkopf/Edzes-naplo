@@ -19,7 +19,7 @@ import com.workouttracker.ui.theme.*
 @Composable
 fun MainScreen(onNavigate: (String) -> Unit) {
     Scaffold (
-        topBar = { CenterAlignedTopAppBar(title = { Text("Workout Tracker", style = MaterialTheme.typography.headlineMedium) }) }
+        topBar = { CenterAlignedTopAppBar(title = { Text("LogLift", style = MaterialTheme.typography.headlineMedium) }) }
     ){innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)
             .fillMaxSize()
