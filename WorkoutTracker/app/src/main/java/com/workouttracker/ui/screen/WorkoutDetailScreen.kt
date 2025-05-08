@@ -127,7 +127,11 @@ fun WorkoutDetailScreen(
                     }
                 }
             }
+            item{
+                Spacer(modifier = Modifier.height(64.dp))
+            }
         }
+
     }
     if (showDialog) {
         AlertDialog(
@@ -224,7 +228,8 @@ fun ExerciseWithSettsCard(exerciseWithSetts: ExerciseWithSetts, workoutWithExerc
                 textStyle = TextStyle(textAlign = TextAlign.Center),
                 value = weightFieldValue,
                 onValueChange = { inputValue ->
-                    if (inputValue.text.matches(Regex("^\\d*\\.?\\d*\$"))) {
+                    if (inputValue.text.matches(Regex("^-?\\d*\\.?\\d*\$")))
+                    {
                         weightFieldValue = inputValue
                         viewModel.setTemporaryWorkout(workoutWithExercises.copy(
                             workoutExercises = workoutWithExercises.workoutExercises.map { exercise ->
