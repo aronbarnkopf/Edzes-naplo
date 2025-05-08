@@ -8,13 +8,11 @@ import androidx.room.TypeConverters
 import com.workouttracker.db.model.*
 //Usage: https://developer.android.com/training/data-storage/room
 @Database(entities = [Workout::class, WorkoutExercise::class,
-    Exercise::class, Sett::class,
-    TimerPreset::class, TimerInterval::class],
-    version = 5, exportSchema = false)
+    Exercise::class, Sett::class],
+    version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutDao(): WorkoutDao
-    abstract fun timerDao(): TimerDao
 
     companion object {
         @Volatile

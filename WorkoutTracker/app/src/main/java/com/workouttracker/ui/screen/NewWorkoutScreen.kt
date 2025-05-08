@@ -154,7 +154,7 @@ fun NewWorkoutScreen(viewModel: WorkoutViewModel, onNavigate: (String) -> Unit) 
                         }
                     }
                     DropdownMenu(expanded = expandedType, onDismissRequest = { expandedType = false }) {
-                        listOf("Back", "Chest", "Shoulder", "Arm", "Leg").forEach { type ->
+                        listOf("Back", "Chest", "Shoulder", "Arm", "Leg", "Abs").forEach { type ->
                             DropdownMenuItem(
                                 text = { Text(type) },
                                 onClick = {

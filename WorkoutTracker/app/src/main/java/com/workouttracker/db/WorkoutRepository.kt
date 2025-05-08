@@ -66,5 +66,21 @@ class WorkoutRepository(private val workoutDao: WorkoutDao) {
     suspend fun getWorkoutWithExercise(exerciseId: Int): List<WorkoutWithExercises> {
         return workoutDao.getWorkoutWithExercise(exerciseId)
     }
+
+    suspend fun getLastSetts(id: Int): List<Sett> {
+        val workouts = workoutDao.getWorkoutWithExercise(id).toMutableList()
+        if (workouts.isEmpty()) return emptyList()
+
+        workouts.sortByDescending { it.workout.date }
+
+        val firstWorkoutExercise = workouts[0].workoutExercises.find { it.exercise.id == id }
+        return firstWorkoutExercise?.setts ?: emptyList()
+    }
+
+    suspend fun removeWorkout(id: Int) {
+        workoutDao.removeWorkoutExerises(id)
+        workoutDao.removeWorkout(id)
+    }
+
 }
 

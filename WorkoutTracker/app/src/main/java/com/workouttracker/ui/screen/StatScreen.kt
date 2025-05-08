@@ -98,7 +98,7 @@ fun StatScreen(viewModel: WorkoutViewModel){
                 LineChartView(chartData)
                 ChartDataList(chartData)
             } else {
-                Text("Nincs adat a kiválasztott gyakorlatra.")
+                Text("No data for the chosen exercise.")
             }
         }
     }
@@ -117,23 +117,19 @@ fun LineChartView(chartData: List<Pair<Date, List<Sett>>>) {
                     if (setts.isNotEmpty()) {
                         val maxSett = setts.maxByOrNull { it.weight }
                         maxSett?.let {
-                            val weight = it.weight.toDouble()
-                                .coerceAtLeast(1.0)
-                                .toFloat() * (1 + (it.reps / 40f))
-                            Entry(date.time.toFloat(), weight)
+                            Entry(date.time.toFloat(), it.weight)
                         }
                     } else {
                         null
                     }
                 }
-
+                println("Last entry: ${entries.lastOrNull()}")
                 val dataSet = LineDataSet(entries, "Progress").apply {
                     color = Color.RED
                     valueTextColor = Color.BLACK
                     setDrawCircles(true)
                     setDrawValues(false)
                 }
-
                 xAxis.valueFormatter = DateValueFormatter()
                 xAxis.setDrawGridLines(false)
                 this.data = LineData(dataSet)

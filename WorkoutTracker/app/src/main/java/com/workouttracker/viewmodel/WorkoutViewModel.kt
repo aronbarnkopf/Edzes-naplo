@@ -2,6 +2,7 @@ package com.workouttracker.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.workouttracker.db.WorkoutRepository
 import com.workouttracker.db.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -124,6 +125,32 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     fun deleteAll(){
         viewModelScope.launch {
             repository.deleteAll()
+        }
+    }
+
+    fun getLastSetts(id: Int, onResult: (List<Sett>) -> Unit){
+        viewModelScope.launch {
+            val lastSetts =  repository.getLastSetts(id)
+            onResult(lastSetts)
+        }
+    }
+
+    private val _lastSettsMap = MutableStateFlow<Map<Int, List<Sett>>>(emptyMap())
+    val lastSettsMap: StateFlow<Map<Int, List<Sett>>> = _lastSettsMap
+
+    fun getLastSetts(exerciseId: Int) {
+        viewModelScope.launch {
+            val setts = repository.getLastSetts(exerciseId) // Feltételezett repository függvény
+            _lastSettsMap.value = _lastSettsMap.value.toMutableMap().apply {
+                this[exerciseId] = setts
+            }
+        }
+    }
+
+    fun removeWorkout(id: Int) {
+        viewModelScope.launch {
+            repository.removeWorkout(id)
+            getAllSavedWorkouts()
         }
     }
 }
