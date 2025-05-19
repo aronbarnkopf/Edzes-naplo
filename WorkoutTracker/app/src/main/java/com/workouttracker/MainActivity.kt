@@ -4,44 +4,63 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
+import com.workouttracker.db.AppDatabase
+import com.workouttracker.db.WorkoutRepository
+import com.workouttracker.db.model.*
+import com.workouttracker.ui.AppNavHost
 import com.workouttracker.ui.theme.WorkoutTrackerTheme
+import com.workouttracker.viewmodel.*
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            WorkoutTrackerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+    private lateinit var workoutViewModel: WorkoutViewModel
+
+    // Method to clear all data in the database
+    private fun clearDatabase() {
+        lifecycleScope.launch {
+            try {
+                // Delete all workouts
+                workoutViewModel.deleteAll()
+
+                // Log the success (optional)
+                println("Database cleared!")
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WorkoutTrackerTheme {
-        Greeting("Android")
+        val database = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "workout-db"
+        ).fallbackToDestructiveMigration().build()
+
+        val workoutRepository = WorkoutRepository(database.workoutDao())
+        val workoutFactory = WorkoutViewModelFactory(workoutRepository)
+        workoutViewModel = ViewModelProvider(this, workoutFactory)[WorkoutViewModel::class.java]
+
+
+        // Clear the database every time the app starts (for development)
+        //clearDatabase()
+
+
+        setContent {
+            WorkoutTrackerTheme {
+                val navController = rememberNavController()
+                AppNavHost(navController = navController, workoutViewModel = workoutViewModel)
+            }
+        }
     }
 }
